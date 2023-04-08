@@ -48,8 +48,10 @@ let fieldDATASET = {
     "20": {},
     "60": { fromTo:"bottom" },
     "61": { fromTo:"left" },
+    "62": { fromTo: "top"},
     "80": { fromTo:"right" },
-    "81": { fromTo:"bottom" }
+    "81": { fromTo:"bottom" },
+    "82": { fromTo:"top" }
 }
 
 
@@ -89,17 +91,27 @@ class charactor {
 //towerのデータ
 //range:攻撃範囲, damage:与えるダメージ, speed:連射速度
 let towerDATASET = {
-    test: { range: 1, damage: 1, speed: 1, cost: 100 },
-    test2: { range: 2, damage: 2, speed: 2, cost: 200 },
-    test3: { range: 3, damage: 3, speed: 3, cost: 300 }
+    "赤タワー": { range: 1, damage: 1, speed: 3, cost: 100 },
+    "赤タワー Lv.2": { range: 2, damage: 1, speed: 6, cost: 400 },
+    "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900 },
+    "青タワー": { range: 3, damage: 1, speed: 1, cost: 200 },
+    "青タワー Lv.2": { range: 6, damage: 3, speed: 1, cost: 500 },
+    "青タワー Lv.3": { range: 10, damage: 5, speed: 2, cost: 1000 },
+    "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300 },
+    "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600 },
+    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100 },
+    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000 },
+    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200 },
+    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500 },
+    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000 }
 }
 
 class tower extends charactor {
     constructor(x, y, name) {
         super(x, y, name);
-        this.range = b * towerDATASET[name]["range"];
+        this.range = rtnRange(towerDATASET[name]["range"]);
         this.damage = towerDATASET[name]["damage"];
-        this.speed = frameUnit * 25 / towerDATASET[name]["speed"];
+        this.speed = Math.floor(frameUnit * 25 / towerDATASET[name]["speed"]);
         this.img = towerDATASET[name]["img"];
         this.target = this.Target();
         this.show();
@@ -156,9 +168,15 @@ class tower extends charactor {
 //enemyのデータ。
 //size:大きさ, hp:体力, damage:自陣まで到達した時のダメージ, speed:移動速度（0～10）
 let enemyDATASET = {
-    test: { size: 1, hp: 10, damage: 1, speed: 1, reward: 100 },
-    test2: { size: 2, hp: 20, damage: 2, speed: 2, reward: 200 },
-    test3: { size: 3, hp: 30, damage: 3, speed: 3, reward: 300 }
+    "Red Enemy": { size: 1, hp: 10, damage: 1, speed: 6, reward: 50 },
+    "Hi-Red Enemy": { size: 1, hp: 10, damage: 1, speed: 10, reward: 100 },
+    "Blue Enemy": { size: 2, hp: 20, damage: 1, speed: 2, reward: 100 },
+    "Hi-Blue Enemy": { size: 2, hp: 40, damage: 2, speed: 4, reward: 200 },
+    "Green Enemy": { size: 3, hp: 50, damage: 3, speed: 2, reward: 300 },
+    "Hi-Green Enemy": { size: 3, hp: 80, damage: 4, speed: 2, reward: 400 },
+    "Purple Enemy": { size: 4, hp: 100, damage: 5, speed: 5, reward: 500 },
+    "Black Enemy": { size: 5, hp: 500, damage: 10, speed: 1, reward: 700 },
+    "King Black": { size: 5, hp: 1000, damage: 10, speed: 2, reward: 1000 }
 }
 
 class enemy extends charactor {
@@ -210,6 +228,7 @@ class enemy extends charactor {
         let open = [[start, [start]]];
         let tf = true;
         let i;
+        let rtn = [];
 
         while (tf) {
             let pre = [];
@@ -228,19 +247,20 @@ class enemy extends charactor {
                     if (ck([nx, ny], close)) continue;
 
                     pre.push([[nx, ny], e[1].concat([[nx, ny]])]);
-                    close.push([nx, ny]);
+                    if (parseInt(fieldDATA[ny][nx]) < 16)close.push([nx, ny]);
 
                 }
             });
             open = pre;
+            rtn = [];
             for (i = 0; i < open.length; i++) {
                 if (ck(open[i][0], goals)) {
                     tf = false;
-                    break;
+                    rtn.push(open[i][1]);
                 }
             }
         }
-        return open[i][1];
+        return rtn[getRundom(0, rtn.length - 1)];
     }
 
     //移動する方向を決定

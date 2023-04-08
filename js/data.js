@@ -1,41 +1,105 @@
-//1ブロックの一片の長さ
-const b = 60;
-
-let fontHeight = 12;
-
-
-
-//フィールドのデータ。どの画像を用いるかを規定
-let fieldDATA = [
-    ["00", "00", "00", "00", "00", "00", "00", "00", "00", "00"],
-    ["00", "12", "11", "11", "11", "11", "11", "11", "13", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
-    ["00", "60", "00", "00", "00", "00", "00", "00", "80", "00"]
+let STAGEDATASET = [
+    ["TestStage", "10 X 10"],
+    ["Stage 1", "10 X 10"],
+    ["Stage 2", "6 X 6"]
 ];
 
-//enemyの出現データ。
-let enemyDATA = [
-    3,//Level数 
-    [3, //各レベルのWave数 
-        { test: 2 }, //各Enemyの出現数 
-        { test: 1, test3: 2 }, 
-        { test: 1, test2: 2, test3: 3 }
-    ], 
-    [3, 
-        { test: 10, test2: 10 }, 
-        { test: 10, test3: 20 }, 
-        { test: 10, test2: 20, test3: 30 }
+//全データ
+const Data = {
+    "TestStage":[60, 12, 50000,
+        [
+            ["00", "00", "00", "00", "00", "00", "00", "00", "00", "00"],
+            ["00", "12", "11", "11", "11", "11", "11", "11", "13", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "10", "00", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "60", "00", "00", "00", "00", "00", "00", "80", "00"]
+        ],
+        [
+            1,
+            [1,
+                {
+                    "Blue Enemy": 1, "Red Enemy": 1, "Green Enemy": 1,
+                    "Hi-Blue Enemy": 1, "Hi-Red Enemy": 1, "Hi-Green Enemy": 1,
+                    "Purple Enemy": 1, "Black Enemy": 1, "King Black": 1
+                }
+            ]
+        ]
     ],
-    [3, 
-        { test: 10, test2: 10 }, 
-        { test: 10, test3: 20 }, 
-        { test: 10, test2: 20, test3: 60 }
-    ]
-];
+    "Stage 1":[
+        //b
+        60,
+        //fontHeight 
+        12,
+        //fund
+        500,
+        //FieldDATA
+        [
+            ["00", "00", "00", "00", "00", "00", "00", "00", "00", "00"],
+            ["61", "11", "16", "11", "11", "11", "11", "11", "13", "00"],
+            ["00", "00", "10", "00", "00", "00", "00", "00", "10", "00"],
+            ["00", "00", "15", "13", "00", "00", "00", "00", "10", "00"],
+            ["00", "00", "00", "15", "13", "00", "00", "00", "10", "00"],
+            ["00", "00", "00", "00", "19", "11", "11", "11", "18", "81"],
+            ["00", "00", "12", "11", "14", "00", "00", "00", "00", "00"],
+            ["00", "00", "10", "00", "00", "00", "00", "00", "00", "00"],
+            ["61", "11", "14", "00", "00", "00", "00", "00", "00", "00"],
+            ["00", "00", "00", "00", "00", "00", "00", "00", "00", "00"]
+        ], 
+        //EnemyDATA
+        [
+            5, //Level数
+            //Level 1
+            [3, //Wave数
+                { "Blue Enemy": 2 },
+                { "Red Enemy": 3, "Blue Enemy": 2 },
+                { "Blue Enemy": 3, "Red Enemy": 5, "Green Enemy": 1 }
+            ],
+            //Level 2
+            [3,
+                { "Blue Enemy": 2, "Hi-Blue Enemy": 2, "Red Enemy": 6, "Green Enemy": 3},
+                { "Blue Enemy": 4, "Red Enemy": 5, "Hi-Red Enemy": 5, "Green Enemy": 4},
+                { "Blue Enemy": 6, "Red Enemy": 12, "Green Enemy": 3, "Hi-Green Enemy": 3 }
+            ],
+            //Level 3
+            [3,
+                { "Blue Enemy": 3, "Hi-Blue Enemy": 3, "Red Enemy": 6, "Hi-Red Enemy": 6, "Green Enemy": 3, "Hi-Green Enemy": 3, "Purple Enemy": 1},
+                { "Blue Enemy": 4, "Hi-Blue Enemy": 4, "Red Enemy": 7, "Hi-Red Enemy": 7, "Green Enemy": 3, "Hi-Green Enemy": 3, "Purple Enemy": 2},
+                { "Blue Enemy": 5, "Hi-Blue Enemy": 5, "Red Enemy": 8, "Hi-Red Enemy": 8, "Green Enemy": 4, "Hi-Green Enemy": 4, "Purple Enemy": 3}
+            ],
+            //Level 4
+            [3,
 
+                { "Blue Enemy": 5, "Hi-Blue Enemy": 5, "Red Enemy": 8, "Hi-Red Enemy": 8, "Green Enemy": 5, "Hi-Green Enemy": 4, "Purple Enemy": 3 },
+                { "Blue Enemy": 6, "Hi-Blue Enemy": 6, "Red Enemy": 10, "Hi-Red Enemy": 10, "Green Enemy": 5, "Hi-Green Enemy": 5, "Purple Enemy": 4 },
+                { "Blue Enemy": 8, "Hi-Blue Enemy": 8, "Red Enemy": 12, "Hi-Red Enemy": 12, "Green Enemy": 6, "Hi-Green Enemy": 6, "Purple Enemy": 5 }
+            ],
+            //Level 5
+            [4,
+
+                { "Blue Enemy": 10, "Hi-Blue Enemy": 10, "Red Enemy": 15, "Hi-Red Enemy": 15, "Green Enemy": 7, "Hi-Green Enemy": 7, "Purple Enemy": 6, "Black Enemy": 1},
+                { "Blue Enemy": 15, "Hi-Blue Enemy": 15, "Red Enemy": 15, "Hi-Red Enemy": 15, "Green Enemy": 7, "Hi-Green Enemy": 7, "Purple Enemy": 8, "Black Enemy": 2},
+                { "Blue Enemy": 20, "Hi-Blue Enemy": 20, "Red Enemy": 25, "Hi-Red Enemy": 25, "Green Enemy": 10, "Hi-Green Enemy": 10, "Purple Enemy": 10, "Black Enemy": 5},
+                { "Blue Enemy": 20, "Hi-Blue Enemy": 20, "Red Enemy": 25, "Hi-Red Enemy": 25, "Green Enemy": 10, "Hi-Green Enemy": 10, "Purple Enemy": 10, "Black Enemy": 5, "King Black": 1}
+            ]
+        ]
+
+    ],
+    "Stage 2":[100, 20, 200, [
+        ["00", "62", "00", "00", "00", "00"],
+        ["00", "10", "00", "00", "00", "00"],
+        ["00", "10", "00", "00", "00", "00"],
+        ["00", "15", "11", "11", "13", "00"],
+        ["00", "00", "00", "00", "10", "00"],
+        ["00", "00", "00", "00", "80", "00"]
+        ], [3, 
+            [2, {"Blue Enemy": 1}, {"Blue Enemy": 1, "Red Enemy": 2}],
+            [2, {"Blue Enemy": 2, "Red Enemy":3}, {"Blue Enemy": 2, "Red Enemy": 2, "Green Enemy": 1}],
+            [2, {"Blue Enemy": 3, "Red Enemy":6, "Green Enemy": 2}, {"Blue Enemy": 4, "Red Enemy": 6, "Green Enemy": 3}, {"Blue Enemy": 6, "Red Enemy": 8, "Green Enemy": 5}]
+        ]
+    ]
+}
