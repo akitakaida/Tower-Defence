@@ -31,6 +31,8 @@ let ID = 0;
 //6フレーム一単位
 let frameUnit = 6;
 
+let STAGEDATASET = [];
+
 //fieldのデータセット
 //fromTo:スタート、ゴールのみに設定。どこからスタートするか
 let fieldDATASET = {
@@ -91,19 +93,19 @@ class charactor {
 //towerのデータ
 //range:攻撃範囲, damage:与えるダメージ, speed:連射速度
 let towerDATASET = {
-    "赤タワー": { range: 1, damage: 1, speed: 3, cost: 100 },
-    "赤タワー Lv.2": { range: 2, damage: 1, speed: 6, cost: 400 },
-    "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900 },
-    "青タワー": { range: 3, damage: 1, speed: 1, cost: 200 },
-    "青タワー Lv.2": { range: 6, damage: 3, speed: 1, cost: 500 },
-    "青タワー Lv.3": { range: 10, damage: 5, speed: 2, cost: 1000 },
-    "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300 },
-    "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600 },
-    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100 },
-    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000 },
-    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200 },
-    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500 },
-    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000 }
+    "赤タワー": { range: 1, damage: 1, speed: 3, cost: 100, next: "赤タワー Lv.2"},
+    "赤タワー Lv.2": { range: 2, damage: 1, speed: 6, cost: 400, next: "赤タワー Lv.3" },
+    "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900, next: "赤タワー Lv.Max" },
+    "青タワー": { range: 3, damage: 1, speed: 1, cost: 200, next: "青タワー Lv.2" },
+    "青タワー Lv.2": { range: 6, damage: 3, speed: 1, cost: 500, next: "青タワー Lv.3" },
+    "青タワー Lv.3": { range: 10, damage: 5, speed: 2, cost: 1000, next: "青タワー Lv.Max" },
+    "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300, next: "緑タワー Lv.2" },
+    "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600, next: "緑タワー Lv.3"},
+    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, next: "緑タワー Lv.Max" },
+    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000, next: null},
+    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200, next: null},
+    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500, next: null},
+    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000, next: null}
 }
 
 class tower extends charactor {
@@ -168,25 +170,25 @@ class tower extends charactor {
 //enemyのデータ。
 //size:大きさ, hp:体力, damage:自陣まで到達した時のダメージ, speed:移動速度（0～10）
 let enemyDATASET = {
-    "Red Enemy": { size: 1, hp: 10, damage: 1, speed: 6, reward: 50 },
+    "Red Enemy": { size: 1, hp: 10, damage: 1, speed: 5, reward: 50 },
     "Hi-Red Enemy": { size: 1, hp: 10, damage: 1, speed: 10, reward: 100 },
     "Blue Enemy": { size: 2, hp: 20, damage: 1, speed: 2, reward: 100 },
     "Hi-Blue Enemy": { size: 2, hp: 40, damage: 2, speed: 4, reward: 200 },
     "Green Enemy": { size: 3, hp: 50, damage: 3, speed: 2, reward: 300 },
-    "Hi-Green Enemy": { size: 3, hp: 80, damage: 4, speed: 2, reward: 400 },
+    "Hi-Green Enemy": { size: 3, hp: 80, damage: 4, speed: 3, reward: 400 },
     "Purple Enemy": { size: 4, hp: 100, damage: 5, speed: 5, reward: 500 },
     "Black Enemy": { size: 5, hp: 500, damage: 10, speed: 1, reward: 700 },
     "King Black": { size: 5, hp: 1000, damage: 10, speed: 2, reward: 1000 }
 }
 
 class enemy extends charactor {
-    constructor(x, y, name) {
+    constructor(x, y, name, route) {
         super(x, y, name);
         this.size = b / 5 * enemyDATASET[name]["size"];
         this.hp = enemyDATASET[name]["hp"];
         this.damage = enemyDATASET[name]["damage"];
         this.speed = enemyDATASET[name]["speed"] / frameUnit;
-        this.route = this.rtnRoute();
+        this.route = route;
         this.direction = [0, 0];
         this.culcDir();
         this.img = enemyDATASET[name]["img"];
@@ -219,50 +221,6 @@ class enemy extends charactor {
         this.hp -= damage;
         if(this.hp < 0) this.hp = 0;
     }
-    //最短ルートを求める
-    rtnRoute() {
-        let start = sec(this.x, this.y);
-        let dx = [1, 0, -1, 0];
-        let dy = [0, -1, 0, 1];
-        let close = [start];
-        let open = [[start, [start]]];
-        let tf = true;
-        let i;
-        let rtn = [];
-
-        while (tf) {
-            let pre = [];
-            open.forEach((e) => {
-                for (i = 0; i < 4; i++) {
-                    let nx = e[0][0] + dx[i];
-                    let ny = e[0][1] + dy[i];
-
-                    //field からはみ出さないか
-                    if (ny >= fieldDATA.length || ny < 0 || nx >= fieldDATA[0].length || nx < 0) continue;
-
-                    //道、Start、Goalか
-                    if (parseInt(fieldDATA[ny][nx]) < 10) continue;
-
-                    //既に到達していないか
-                    if (ck([nx, ny], close)) continue;
-
-                    pre.push([[nx, ny], e[1].concat([[nx, ny]])]);
-                    if (parseInt(fieldDATA[ny][nx]) < 16)close.push([nx, ny]);
-
-                }
-            });
-            open = pre;
-            rtn = [];
-            for (i = 0; i < open.length; i++) {
-                if (ck(open[i][0], goals)) {
-                    tf = false;
-                    rtn.push(open[i][1]);
-                }
-            }
-        }
-        return rtn[getRundom(0, rtn.length - 1)];
-    }
-
     //移動する方向を決定
     culcDir() {
         let i;
@@ -272,7 +230,7 @@ class enemy extends charactor {
         for (i = 0; i < this.route.length; i++) {
             if (now[0] === this.route[i][0] && now[1] === this.route[i][1]) break;
         }
-        if (i + 1 == this.route.length) return;
+        if (i + 1 >= this.route.length) return;
         let next = this.route[i + 1];
         this.direction = [next[0] - now[0], next[1] - now[1]];
     }

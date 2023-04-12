@@ -22,9 +22,10 @@ let towers = [];
 let enemies = [];
 let bullets = [];
 
-//スタート位置とゴール位置を格納
+//スタート位置とゴール位置、全ルートを格納
 let starts = [];
 let goals = [];
+let routes = [];
 
 //現在のライフ、レベル、ウェーブ、お金
 let life = 10;
@@ -41,6 +42,7 @@ let possibillity = true;
 //Towerを設置する時に使う。
 let towerList = [];
 let mouseIndex = null;
+let levelUP = false;
 
 let GAMEMODE = 10;
 
@@ -52,10 +54,10 @@ function main(){
         //ゲーム開始前にリセット
         case 0:
             b = Data[stage][0];
-            fontHeight = Data[stage][1];
-            fund = Data[stage][2];
-            fieldDATA = Data[stage][3];
-            enemyDATA = Data[stage][4];
+            fontHeight = b / 5;
+            fund = Data[stage][1];
+            fieldDATA = Data[stage][2];
+            enemyDATA = Data[stage][3];
             frame = 0;
             towers = [];
             enemies = [];
@@ -121,6 +123,7 @@ function back(){
 
 //GameClearの処理
 function GameClear(){
+    mouseIndex = null;
     twsc.fillStyle = "rgba(255, 255, 255, 0.4)";
     twsc.fillRect(0, 0, tws.width, tws.height);
     twsc.fillStyle = "rgb(255, 178, 0)";
@@ -148,8 +151,7 @@ layers[layers.length - 1].addEventListener("click", (e) => {
     if (!possibillity) return;
     let p = pos(e);
     p[0] -= field.width;
-    if (p[0] < fontHeight || p[0] > fontHeight + b * 3 || p[1] < fontHeight * 8 || p[1] > fontHeight * 10.5) return;
-    GAMEMODE = 2;
+    if (p[0] >= fontHeight && p[0] <= fontHeight + b * 3 && p[1] >= fontHeight * 9 || p[1] <= fontHeight * 11.5) GAMEMODE = 2;
 });
 
 //level, waveの進行可否を判定

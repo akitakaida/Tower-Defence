@@ -43,6 +43,11 @@ function compDATASET(){
         enemyDATASET[k]["img"] = new Image();
         enemyDATASET[k]["img"].src = "img/" + k + ".png";
     }
+    for(let k in Data){
+        let h = Data[k][2].length;
+        let w = Data[k][2][0].length;
+        STAGEDATASET.push([k, `${h} X ${w}`]);
+    }
 }
 
 //canvasのサイズとレイヤ指定
@@ -75,10 +80,12 @@ function writeField(data) {
     //canvasの大きさを規定
     setCVS(data[0].length, data.length);
     //ブロック区画の作成
+    fc.fillStyle = "rgb(100, 100, 100)";
     for (let i = 0; i < data.length + 1; i++) {
-        fc.fillStyle = "rgb(100, 100, 100)";
-        fc.fillRect(i * (b + 1), 0, 1, field.height);
         fc.fillRect(0, i * (b + 1), field.width, 1);
+    }
+    for (let i = 0; i < data[0].length + 1; i++) {
+        fc.fillRect(i * (b + 1), 0, 1, field.height);
     }
     //通路等の作成
     for (let i = 0; i < data.length; i++) {
@@ -92,6 +99,7 @@ function writeField(data) {
         }
     }
     setLWLtws(data);
+    culcRoute();
 }
 
 //lwlとtwsの設定
@@ -119,14 +127,16 @@ function setLWLtws(data){
 function writeText(){
     //Level、Wave、Fundを描く
     lwlc.fillStyle = "rgb(255, 255, 255)";
-    lwlc.clearRect(0, 0, 3 * (b + 1), fontHeight * 14);
-    let text = "Level: " + level + " / " + enemyDATA[0];
+    lwlc.clearRect(0, 0, 3 * (b + 1), fontHeight * 15);
+    let text = stage;
     lwlc.fillText(text, fontHeight, fontHeight * 2);
-    text = "Wave: " + wave + " / " + enemyDATA[level][0];
+    text = "Level: " + level + " / " + enemyDATA[0];
     lwlc.fillText(text, fontHeight, fontHeight * 4);
-    text = "Fund: " + fund;
+    text = "Wave: " + wave + " / " + enemyDATA[level][0];
     lwlc.fillText(text, fontHeight, fontHeight * 6);
-    
+    text = "Fund: " + fund;
+    lwlc.fillText(text, fontHeight, fontHeight * 8);
+
     //次のWaveへ進行可能な場合は赤色
     if(possibillity) {
         lwlc.fillStyle = "rgb(255, 0, 0)";
@@ -134,14 +144,14 @@ function writeText(){
         lwlc.fillStyle = "rgb(100, 100, 100)";
     }
     //Next Waveボタンの表示
-    lwlc.fillRect(fontHeight, fontHeight * 8, b * 3, fontHeight * 2.5);
+    lwlc.fillRect(fontHeight, fontHeight * 9, b * 3, fontHeight * 2.5);
     lwlc.fillStyle = "rgb(255, 255, 255)";
     text = "Next Wave >>";
-    lwlc.fillText(text, fontHeight, fontHeight * 10);
+    lwlc.fillText(text, fontHeight, fontHeight * 11);
 
     //lifeの表示
     text = "残りライフ: " + life;
-    lwlc.fillText(text, fontHeight, fontHeight * 13);
+    lwlc.fillText(text, fontHeight, fontHeight * 14);
 
 }
 
@@ -158,9 +168,9 @@ function createWave(data){
     let interval;
     if(count > 50){
         interval = 1 * frameUnit;
-    }else if(count > 10){
+    }else if(count > 30){
         interval = 5 * frameUnit;
-    }else if(count > 5){
+    }else if(count > 10){
         interval = 10 * frameUnit;
     }else{
         interval = 20 * frameUnit;
@@ -169,8 +179,8 @@ function createWave(data){
     let rtn = [];
     for (let e in arr) {
         for (let i = 0; i < arr[e]; i++){
-            let st = starts[getRundom(0, starts.length - 1)];
-            rtn.push([st, e]);
+            let rt = routes[getRundom(0, routes.length - 1)];
+            rtn.push([e, rt]);
         }
     }
     arrayShuffle(rtn);
@@ -193,11 +203,11 @@ function runWave(){
 }
 
 //enemyを出現
-function appearEnemies(s, name){
-    let field = fieldDATA[s[1]][s[0]]; //スタートする区画の番号
-    let sXY = [s[0] * (b + 1) + 1, s[1] * (b + 1) + 1]; //startする区画の右上の位置
+function appearEnemies(name, route) {
+    let field = fieldDATA[route[0][1]][route[0][0]]; //スタートする区画の番号
+    let sXY = [route[0][0] * (b + 1) + 1, route[0][1] * (b + 1) + 1]; //startする区画の右上の位置
     let from;//Enemyの出現位置
-    switch(fieldDATASET[field]["fromTo"]){
+    switch (fieldDATASET[field]["fromTo"]) {
         case "bottom":
             from = [getRundom(sXY[0] + b / 20, sXY[0] + b - b / 20 - b / 5 * enemyDATASET[name]["size"]), sXY[1] + b];
             break;
@@ -211,7 +221,54 @@ function appearEnemies(s, name){
             from = [sXY[0] + b, getRundom(sXY[1] + b / 20, sXY[1] + b - b / 20 - b / 5 * enemyDATASET[name]["size"])];
             break;
     }
-    enemies.push(new enemy(from[0], from[1], name));
+    enemies.push(new enemy(from[0], from[1], name, route));
+}
+
+//routeを計算
+function culcRoute(){
+    let rtn = [];
+    for(let j = 0; j < starts.length; j++){
+        let start = starts[j];
+        let dx = [1, 0, -1, 0];
+        let dy = [0, -1, 0, 1];
+        let close = [start];
+        let open = [[start, [start]]];
+        let tf = true;
+        let i;
+
+        while (tf) {
+            let pre = [];
+            let preClose = [];
+            open.forEach((e) => {
+                for (i = 0; i < 4; i++) {
+                    let nx = e[0][0] + dx[i];
+                    let ny = e[0][1] + dy[i];
+
+                    //field からはみ出さないか
+                    if (ny >= fieldDATA.length || ny < 0 || nx >= fieldDATA[0].length || nx < 0) continue;
+
+                    //道、Goalか
+                    if (parseInt(fieldDATA[ny][nx]) < 10) continue;
+
+                    //スタートに到達していないか
+                    if (ck([nx, ny], close)) continue;
+
+                    pre.push([[nx, ny], e[1].concat([[nx, ny]])]);
+                    if(!ck([nx, ny], preClose)) preClose.push([nx, ny]);
+
+                }
+            });
+            open = pre;
+            close = close.concat(preClose);
+            for (i = 0; i < open.length; i++) {
+                if (ck(open[i][0], goals)) {
+                    tf = false;
+                    rtn.push(open[i][1]);
+                }
+            }
+        }
+    }
+    routes = rtn;
 }
 
 //enemyを一斉に動かす
@@ -466,6 +523,7 @@ layers[layers.length - 1].addEventListener("mouseup", createTower);
 function moveTower(e) {
     if(GAMEMODE > 3) return;
     if (mouseIndex == null) return;
+    levelUP = false;
     //mouse位置の取得
     let p = pos(e);
     //mouseのいる座標の取得
@@ -488,6 +546,10 @@ function moveTower(e) {
                     let txy = sec(towers[i].getX, towers[i].getY);
                     //既にその位置にTowerがあったとき
                     if (txy[0] == xy[0] && txy[1] == xy[1]) {
+                        if(towerDATASET[towers[i].getName]["next"] == towerList[mouseIndex][0]) {
+                            levelUP = true;
+                            twsc.fillStyle = "rgba(255, 255, 255, 0.5)";
+                        }
                         break;
                     }
                 }
@@ -496,14 +558,25 @@ function moveTower(e) {
                 twsc.fillStyle = "rgba(255, 178, 0, 0.5)";
             }
         }
-        if(fund < towerDATASET[towerList[mouseIndex][0]]["cost"]) twsc.fillStyle = "rgba(255, 0, 0, 0.5)";
+        let up = 1;
+        if(levelUP) up = 2;
+        if(fund < towerDATASET[towerList[mouseIndex][0]]["cost"] / up){
+            twsc.fillStyle = "rgba(255, 0, 0, 0.5)";
+            levelUP = false;
+        }
         twsc.fillRect(xy[0] * (b + 1) + 1, xy[1] * (b + 1) + 1, b, b);
         lc3.beginPath();
         lc3.arc(xy[0] * (b + 1) + 1 + b / 2, xy[1] * (b + 1) + 1 + b / 2, rtnRange(towerDATASET[towerList[mouseIndex][0]]["range"]), 0, 2 * Math.PI);
         lc3.strokeStyle = "rgb(255, 255, 0)";
         lc3.stroke();
     }
-    twsc.drawImage(towerDATASET[towerList[mouseIndex][0]]["img"], p[0] - b / 2, p[1] - b / 2, b, b);    
+    twsc.drawImage(towerDATASET[towerList[mouseIndex][0]]["img"], p[0] - b / 2, p[1] - b / 2, b, b); 
+    if(levelUP){
+        twsc.fillStyle = "rgba(255, 255, 255, 0.7)";
+        twsc.fillRect(xy[0] * (b + 1) + 1, xy[1] * (b + 1) + 1 + b, b, -1 * fontHeight);
+        twsc.fillStyle = "rgb(0, 0, 0)";
+        twsc.fillText("LEVEL UP", xy[0] * (b + 1) + 1, xy[1] * (b + 1) + 1 + b);
+    }   
 }
 //マウスを離した時
 function createTower(e) {
@@ -516,8 +589,12 @@ function createTower(e) {
     twsc.clearRect(0, 0, tws.width, tws.height);
     lc3.clearRect(0, 0, layer3.width, layer3.height);
     
+    let up = 1;
+    if(levelUP) up = 2;
+    levelUP = false;
+
     //お金が足りなければ終了
-    if(fund < towerDATASET[towerList[index][0]]["cost"]) return;
+    if(fund < towerDATASET[towerList[index][0]]["cost"] / up) return;
     
     //マウス位置
     let xy = sec(pos(e)[0], pos(e)[1]);
@@ -529,11 +606,18 @@ function createTower(e) {
         for (let i = 0; i < towers.length; i++) {
             let txy = sec(towers[i].getX, towers[i].getY);
             //既にその位置にTowerがあったとき
-            if (txy[0] == xy[0] && txy[1] == xy[1]) return;
+            if (txy[0] == xy[0] && txy[1] == xy[1]) {
+                if(up === 2){
+                    //タワーのレベルアップ処理
+                    towers.splice(i,1);
+                }else{
+                    return;
+                }
+            }
         }
     }
     towers.push(new tower(xy[0] * (b + 1) + 1, xy[1] * (b + 1) + 1, towerList[index][0]));
-    fund -= towerDATASET[towerList[index][0]]["cost"];
+    fund -= towerDATASET[towerList[index][0]]["cost"] / up;
 }
     
 //Towerを撤去orLevelUp
