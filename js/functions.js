@@ -487,9 +487,9 @@ function showTowerData(e) {
     twsc.strokeStyle = "rgb(255, 255, 255)";
     let ulx = xy[0] * (b + 1) - b * 0.8;
     let uly = xy[1] * (b + 1) - b;
-    twsc.fillRect(ulx, uly, b * 1.7, b * 1.5);
+    twsc.fillRect(ulx, uly, b * 1.7, b * 1.6);
     twsc.lineWidth = 1;
-    twsc.strokeRect(ulx, uly, b * 1.7, b * 1.5);
+    twsc.strokeRect(ulx, uly, b * 1.7, b * 1.6);
     twsc.fillStyle = "rgb(255, 255, 255)";
     
     let text = i;
@@ -502,6 +502,18 @@ function showTowerData(e) {
     twsc.fillText(text, ulx + 1, uly + fontHeight * 4 + 3);
     text = `コスト: ${towerDATASET[i]["cost"]}`;
     twsc.fillText(text, ulx + 1, uly + fontHeight * 5 + 4);
+    text = `レベルアップ: `;
+    twsc.fillText(text, ulx + 1, uly + fontHeight * 6 + 5);
+    text = towerDATASET[i]["next"];
+    for(let j = 0; j < towerList.length; j++){
+        if(towerList[j][0] == text){
+            twsc.fillStyle = "rgb(255, 255, 0)";
+            twsc.fillText(text, ulx + fontHeight, uly + fontHeight * 7 + 6);
+            return;
+        } 
+    }
+    text  = "無し";
+    twsc.fillText(text, ulx + fontHeight, uly + fontHeight * 7 + 6);
 }
 
 //Towerを生成

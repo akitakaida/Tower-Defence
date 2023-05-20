@@ -93,12 +93,12 @@ class charactor {
 //towerのデータ
 //range:攻撃範囲, damage:与えるダメージ, speed:連射速度
 let towerDATASET = {
-    "赤タワー": { range: 1, damage: 1, speed: 3, cost: 100, next: "赤タワー Lv.2"},
-    "赤タワー Lv.2": { range: 2, damage: 1, speed: 6, cost: 400, next: "赤タワー Lv.3" },
+    "赤タワー": { range: 1, damage: 1, speed: 4, cost: 100, next: "赤タワー Lv.2"},
+    "赤タワー Lv.2": { range: 2, damage: 1, speed: 7, cost: 400, next: "赤タワー Lv.3" },
     "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900, next: "赤タワー Lv.Max" },
-    "青タワー": { range: 3, damage: 1, speed: 1, cost: 200, next: "青タワー Lv.2" },
-    "青タワー Lv.2": { range: 6, damage: 3, speed: 1, cost: 500, next: "青タワー Lv.3" },
-    "青タワー Lv.3": { range: 10, damage: 5, speed: 2, cost: 1000, next: "青タワー Lv.Max" },
+    "青タワー": { range: 3, damage: 2, speed: 1, cost: 200, next: "青タワー Lv.2" },
+    "青タワー Lv.2": { range: 6, damage: 4, speed: 1, cost: 500, next: "青タワー Lv.3" },
+    "青タワー Lv.3": { range: 10, damage: 6, speed: 2, cost: 1000, next: "青タワー Lv.Max" },
     "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300, next: "緑タワー Lv.2" },
     "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600, next: "緑タワー Lv.3"},
     "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, next: "緑タワー Lv.Max" },
