@@ -1,34 +1,3 @@
-//arrがList内にあるか判定
-function ck(arr, List) {
-    for (let i = 0; i < List.length; i++) {
-        if (arr[0] == List[i][0] && arr[1] == List[i][1]) return true;
-    }
-    return false;
-}
-
-//n以上m以下の乱数を生成
-function getRundom(n, m) {
-    for (let i = 0; i < 5; i++) {
-        let num = Math.floor(Math.random() * (m + 1 - n)) + n;
-        return num;
-    }
-};
-
-//配列のランダム並び替え
-function arrayShuffle(array) {
-    for (let i = (array.length - 1); 0 < i; i--) {
-
-        // 0〜(i+1)の範囲で値を取得
-        let r = getRundom(0, i + 1);
-
-        // 要素の並び替えを実行
-        let tmp = array[i];
-        array[i] = array[r];
-        array[r] = tmp;
-    }
-    return array;
-}
-
 //マウス位置のCanvas上での位置を返す
 function pos(e) {
     let x, y;
@@ -47,6 +16,14 @@ function sec(x, y) {
 
 //DATASETの完成
 function compDATASET(){
+    for (let k in Data) {
+        let h = Data[k][2].length;
+        let w = Data[k][2][0].length;
+        STAGEDATASET[k] = {};
+        STAGEDATASET[k]["text"] = `${h} X ${w}`;
+        STAGEDATASET[k]["img"] = new Image();
+        STAGEDATASET[k]["img"].src = "img/" + k + ".png";
+    }
     for (let k in fieldDATASET) {
         fieldDATASET[k]["img"] = new Image();
         fieldDATASET[k]["img"].src = "img/" + k + ".png";
@@ -54,15 +31,12 @@ function compDATASET(){
     for(let k in towerDATASET){
         towerDATASET[k]["img"] = new Image();
         towerDATASET[k]["img"].src = "img/" + k + ".png";
+        towerDATASET[k]["bullet_img"] = new Image();
+        towerDATASET[k]["bullet_img"].src = "img/" + k + "_bullet.png";
     }
     for (let k in enemyDATASET) {
         enemyDATASET[k]["img"] = new Image();
         enemyDATASET[k]["img"].src = "img/" + k + ".png";
-    }
-    for(let k in Data){
-        let h = Data[k][2].length;
-        let w = Data[k][2][0].length;
-        STAGEDATASET.push([k, `${h} X ${w}`]);
     }
 }
 
@@ -320,69 +294,15 @@ function towersAttack(){
 //弾を線画
 function writeBullet(){
     if (bullets.length === 0) return;
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        //bulletには[towerのID, enemyのID, count]の形で格納
-        let tIndex, eIndex, damage, tx, ty, ex, ey, es;
-
-        try{
-        //対象Enemyを探す
-        for(let j = 0; j < enemies.length; j++){
-            if(enemies[j].getID === bullets[i][1]) {
-                eIndex = j;
-                ex = enemies[j].getX;
-                ey = enemies[j].getY;
-                es = enemies[j].getSize;
-                break;
-            }
-        }
-        
-        //対象Towerを探す
-        for(let j = 0; j < towers.length; j++){
-            if(towers[j].getID === bullets[i][0]){
-                tIndex = j;
-                tx = towers[j].getX;
-                ty = towers[j].getY;
-                break;
-            }
-        }
-        
-        //countが1単位フレーム以上の弾を削除
-        if (bullets[i][2] >= frameUnit) {
-            if (enemies[eIndex] != undefined) enemies[eIndex].attacked(towers[tIndex].getDamage);
+    for (let i = bullets.length - 1; i >= 0; i--){
+        let blt = bullets[i];
+        if (blt.count >= frameUnit) {
             bullets.splice(i, 1);
             continue;
-        }               
-        } catch (error) {
-            console.log(error);
-            bullets[i][2] = frameUnit;
-            return;
         }
-        wB2(tx, ty, ex, ey, es, bullets[i][2]);
-        bullets[i][2]++;
+        blt.move();
+        blt.show();
     }
-}
-//writeBulletの２
-function wB2(x, y, tx, ty, tSize, count) {
-    let i = frameUnit;
-    
-    //Towerの中心
-    let c = [x + b / 2, y + b / 2];
-    
-    //Targetの中心
-    let tc = [tx + tSize / 2, ty + tSize / 2];
-    
-    //Towerの中心からTargetの中心までのベクトル
-    let d = [tc[0] - c[0], tc[1] - c[1]];
-    
-    //ベクトルdの大きさ
-    let d_abs = Math.sqrt(d[0] ** 2 + d[1] ** 2);
-
-    lc2.beginPath();
-    lc2.moveTo(c[0] + count * d[0] / i, c[1] + count * d[1] / i);
-    lc2.lineTo(c[0] + count * d[0] / i + b * (d[0] / d_abs) / 5, c[1] + count * d[1] / i + b * (d[1] / d_abs) / 5);
-    lc2.lineWidth = b / 30 ;
-    lc2.strokeStyle = "rgb(255, 255, 0)";
-    lc2.stroke();
 }
 
 //Enemyの情報を表示
@@ -732,7 +652,7 @@ function changeLW() {
 }
 
 //ステージ選択画面を表示
-function showStages(data) {
+function showStages() {
     b = 180;
     let cs = [field, layer1];
     let num = 4;
@@ -750,8 +670,25 @@ function showStages(data) {
         fc.fillRect(0, i * (b + 1), field.width, 1);
     }
     fc.font = "40px 'Arial'"
+    fc.fillStyle = "rgb(255, 0, 0)";
+    fc.strokeStyle = "rgb(255, 255, 255)"
+
     let c = 0;
-    data.forEach((e) => {
+    for (let k in STAGEDATASET){
+        let li = STAGEDATASET[k];
+        fc.drawImage(li["img"], (c % num) * (b + 1) + 1, Math.floor(c / num) * (b + 1) + 1, b, b);
+        let w = fc.measureText(k).width;
+        fc.fillText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
+        fc.strokeText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
+        w = fc.measureText(li["text"]).width;
+        fc.fillText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
+        fc.strokeText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
+        STAGEDATASET[k]["x"] = c % num;
+        STAGEDATASET[k]["y"] = Math.floor(c / num);
+        c++
+    }
+    //なんかステージ表示が上手くいかないので一旦放置。戻るを押したら表示される
+    /*STAGEDATASET.forEach((e) => {
         let img = new Image();
         img.src = "img/" + e[0] + ".png";
         img.onload = () => {
@@ -767,7 +704,7 @@ function showStages(data) {
             e.push(c % num, Math.floor(c / num));
             c++;
         }
-    });
+    });*/
     layer1.addEventListener("mousemove", selectStage);
     layer1.addEventListener("click", goStage);
 }
@@ -782,18 +719,23 @@ function selectStage(e) {
 }
 //Stage選択
 function goStage(e) {
-    layer1.removeEventListener("mousemove", selectStage);
+    stage = undefined;
+
     let p = pos(e);
     let s = sec(p[0], p[1]);
-    if (s[0] + s[1] * 4 >= STAGEDATASET.length) return;
-    let count = 0;
-    lc1.fillStyle = "rgba(255, 255, 0, 0)";
-    for (let i = 0; i < STAGEDATASET.length; i++) {
-        if (s[0] === STAGEDATASET[i][2] && s[1] === STAGEDATASET[i][3]) {
-            stage = STAGEDATASET[i][0];
+    for (let k in STAGEDATASET) {
+        if (s[0] === STAGEDATASET[k]["x"] && s[1] === STAGEDATASET[k]["y"]) {
+            stage = k;
             break;
         }
     }
+    if (stage == undefined) return;
+
+
+    layer1.removeEventListener("mousemove", selectStage);
+    lc1.fillStyle = "rgba(255, 255, 0, 0)";
+    let count = 0;
+    
     function rect() {
         count++;
         lc1.clearRect(0, 0, layer1.width, layer1.height);

@@ -31,7 +31,7 @@ let ID = 0;
 //6フレーム一単位
 let frameUnit = 6;
 
-let STAGEDATASET = [];
+let STAGEDATASET = {};
 
 //fieldのデータセット
 //fromTo:スタート、ゴールのみに設定。どこからスタートするか
@@ -93,19 +93,19 @@ class charactor {
 //towerのデータ
 //range:攻撃範囲, damage:与えるダメージ, speed:連射速度
 let towerDATASET = {
-    "赤タワー": { range: 1, damage: 1, speed: 4, cost: 100, next: "赤タワー Lv.2"},
-    "赤タワー Lv.2": { range: 2, damage: 1, speed: 7, cost: 400, next: "赤タワー Lv.3" },
-    "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900, next: "赤タワー Lv.Max" },
-    "青タワー": { range: 3, damage: 2, speed: 1, cost: 200, next: "青タワー Lv.2" },
-    "青タワー Lv.2": { range: 6, damage: 4, speed: 1, cost: 500, next: "青タワー Lv.3" },
-    "青タワー Lv.3": { range: 10, damage: 6, speed: 2, cost: 1000, next: "青タワー Lv.Max" },
-    "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300, next: "緑タワー Lv.2" },
-    "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600, next: "緑タワー Lv.3"},
-    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, next: "緑タワー Lv.Max" },
-    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000, next: null},
-    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200, next: null},
-    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500, next: null},
-    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000, next: null}
+    "赤タワー": { range: 1, damage: 1, speed: 4, cost: 100, bullet_size: 1,  next: "赤タワー Lv.2"},
+    "赤タワー Lv.2": { range: 2, damage: 1, speed: 7, cost: 400, bullet_size: 1,  next: "赤タワー Lv.3" },
+    "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900, bullet_size: 1,  next: "赤タワー Lv.Max" },
+    "青タワー": { range: 3, damage: 2, speed: 1, cost: 200, bullet_size: 1,  next: "青タワー Lv.2" },
+    "青タワー Lv.2": { range: 6, damage: 4, speed: 1, cost: 500, bullet_size: 1,  next: "青タワー Lv.3" },
+    "青タワー Lv.3": { range: 10, damage: 6, speed: 2, cost: 1000, bullet_size: 1, next: "青タワー Lv.Max" },
+    "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300, bullet_size: 3,  next: "緑タワー Lv.2" },
+    "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600, bullet_size: 3,  next: "緑タワー Lv.3"},
+    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, bullet_size: 3, next: "緑タワー Lv.Max" },
+    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000, bullet_size: 1, next: null},
+    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200, bullet_size: 1, next: null},
+    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500, bullet_size: 5, next: null},
+    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000, bullet_size: 1, next: null}
 }
 
 class tower extends charactor {
@@ -161,10 +161,78 @@ class tower extends charactor {
         this.target = this.Target();
         for (let i = 0; i < enemies.length; i++) {
             if (enemies[i].getID === this.target) {
-                bullets.push([this.id, enemies[i].id, 0]);
+                bullets.push(new bullet(this.name, this.id, enemies[i].getID, this.damage));
                 return;
             }
         }
+    }
+}
+
+//弾(未完成)
+class bullet{
+    constructor(towerName, towerID, enemyID, damage){
+        this.x = 0;
+        this.y = 0;
+        this.size = b / 10 * towerDATASET[towerName]["bullet_size"];
+        this.img = towerDATASET[towerName]["bullet_img"];
+        this.towerID = towerID;
+        this.enemyID = enemyID;
+        this.damage = damage;
+        this.count = 0;
+    }
+    show(){
+        lc2.drawImage(this.img, this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+    }
+    move(){
+        let tIndex, eIndex, tx, ty, ex, ey, es;
+        
+        //カウントを増やす。frameUnitに到達したら削除される。
+        this.count++;
+        
+        try {
+            //対象Enemyを探す
+            for (let i = 0; i < enemies.length; i++) {
+                if (enemies[i].getID === this.enemyID) {
+                    eIndex = i;
+                    ex = enemies[i].getX;
+                    ey = enemies[i].getY;
+                    es = enemies[i].getSize;
+                    break;
+                }
+            }
+            //対象Towerを探す
+            for (let i = 0; i < towers.length; i++) {
+                if (towers[i].getID === this.towerID) {
+                    tIndex = i;
+                    tx = towers[i].getX;
+                    ty = towers[i].getY;
+                    break;
+                }
+            }
+
+        } catch (error) {
+            console.log(error);
+            this.count = frameUnit;
+            return;
+        }
+        
+        //Towerの中心
+        let tc = new Point(tx + b / 2, ty + b / 2);
+
+        //enemyの中心
+        let ec = new Point(ex + es / 2, ey + es / 2);
+
+        //Towerの中心からenemyの中心までのベクトル
+        let v = new Vecter(ec.x - tc.x, ec.y - tc.y);
+        
+        //frameUnit=6フレームに分けて描画したい。
+        //場所の更新
+        this.x = tc.x + this.count * v.x / frameUnit;
+        this.y = tc.y + this.count * v.y / frameUnit;
+
+        //攻撃
+        if (this.count >= frameUnit && enemies[eIndex] != undefined) enemies[eIndex].attacked(this.damage);
+        
     }
 }
 

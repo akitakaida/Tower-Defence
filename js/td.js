@@ -101,7 +101,7 @@ function main(){
             return;
         //ステージ情報の表示
         case 10:
-            showStages(STAGEDATASET);
+            showStages();
             return;
     }
     writeText();
@@ -109,5 +109,6 @@ function main(){
     requestAnimationFrame(main); 
 }
 
-main();
+
+main()
 
