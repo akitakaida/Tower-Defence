@@ -126,6 +126,7 @@ class tower extends charactor {
     show() {
         super.showImage(lc1, b, this.img);
     }
+    
     //攻撃範囲の表示
     showRange() {
         lc3.beginPath();

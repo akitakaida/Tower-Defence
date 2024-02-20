@@ -126,7 +126,7 @@ const Data = {
         ], [3, 
         [3, { "Red Enemy": 2 }, { "Red Enemy": 4 }, { "Red Enemy": 6 }],
         [3, { "Red Enemy": 10, "Hi-Red Enemy": 5 }, { "Red Enemy": 15, "Hi-Red Enemy": 5 }, { "Red Enemy": 15, "Hi-Red Enemy": 10 } ],
-        [3, { "Red Enemy": 20, "Hi-Red Enemy": 10 }, { "Red Enemy": 50, "Hi-Red Enemy": 30 }, { "Red Enemy": 80, "Hi-Red Enemy": 50 } ]
+        [3, { "Red Enemy": 30, "Hi-Red Enemy": 20 }, { "Red Enemy": 50, "Hi-Red Enemy": 30 }, { "Red Enemy": 80, "Hi-Red Enemy": 50 } ]
         ]
     ],
     "Blue Rush":[60, 500,[
@@ -143,7 +143,7 @@ const Data = {
         ], [
         3,
         [3, { "Blue Enemy": 2 }, { "Blue Enemy": 4 }, { "Blue Enemy": 6 }],
-        [3, { "Blue Enemy": 10, "Hi-Blue Enemy": 5 }, { "Blue Enemy": 15, "Hi-Blue Enemy": 5 }, { "Blue Enemy": 15, "Hi-Blue Enemy": 10 }],
+        [3, { "Blue Enemy": 5, "Hi-Blue Enemy": 2 }, { "Blue Enemy": 7, "Hi-Blue Enemy": 5 }, { "Blue Enemy": 15, "Hi-Blue Enemy": 7 }],
         [3, { "Blue Enemy": 20, "Hi-Blue Enemy": 10 }, { "Blue Enemy": 30, "Hi-Blue Enemy": 10 }, { "Blue Enemy": 30, "Hi-Blue Enemy": 20 }]
         ]
     ]
