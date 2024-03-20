@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Defence</title>
+    <link rel="stylesheet" href="../css/@acab_reset.css">
+    <link rel="stylesheet" href="../css/td.css">
+</head>
+
+<body>
+    <form>
+        <label>ステージ名</label><input type="text" name="name" id="name" value="test"><br>
+        <label>大きさ</label><input type="number" name="height" id="height" max="20" min="1" value="10"><label>x</label>
+        <input type="number" name="width" id="width" max="20" min="1" value="10"><br>
+        <label>b</label><input type="number" name="b" id="b" max="200" min="30" value="60"><br>
+        <label>Level数</label><input type="number" name="level" id="level" max="100" min="1" value="5"><br>
+        <label>Wave数</label><input type="number" name="wave" id="wave" max="10" min="1" value="3"><br>
+        <label>初期Fund</label><input type="number" name="fund" id="fund" max="1000000" min="100" value="500"><br>
+        <input type="button" onclick="create()" value="作成">
+    </form>
+    <canvas id="field">プレイにはcanvasをサポートしているブラウザが必要になります</canvas>
+    <canvas id="layer1"></canvas>
+    <canvas id="layer2"></canvas>
+    <canvas id="layer3"></canvas>
+    <canvas id="showLWL"></canvas>
+    <canvas id="showTowers"></canvas>
+
+    <script src="../js/util.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/datasets.js"></script>
+    <script src="../js/functions.js"></script>
+    <script src="../js/create.js"></script>
+    
+    
+</body>
+
+</html>

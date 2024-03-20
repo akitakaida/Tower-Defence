@@ -1,3 +1,11 @@
+//音を鳴らす
+function sound(name, lp = false){
+    const s = Sounds[name];
+    s.currentTime = 0;
+    s.play();
+    s.loop = lp;
+}
+
 //マウス位置のCanvas上での位置を返す
 function pos(e) {
     let x, y;
@@ -16,27 +24,35 @@ function sec(x, y) {
 
 //DATASETの完成
 function compDATASET(){
+    //音源の取り込み
+    for (let k in Sounds) {
+        Sounds[k] = new Audio(`audio/${k}.mp3`);
+    }
+    //ステージ画像の取り込み
     for (let k in Data) {
         let h = Data[k][2].length;
         let w = Data[k][2][0].length;
         STAGEDATASET[k] = {};
         STAGEDATASET[k]["text"] = `${h} X ${w}`;
         STAGEDATASET[k]["img"] = new Image();
-        STAGEDATASET[k]["img"].src = "img/" + k + ".png";
+        STAGEDATASET[k]["img"].src = `img/${k}.png`;
     }
+    //field画像の取り込み
     for (let k in fieldDATASET) {
         fieldDATASET[k]["img"] = new Image();
-        fieldDATASET[k]["img"].src = "img/" + k + ".png";
+        fieldDATASET[k]["img"].src = `img/${k}.png`;
     }
+    //TowerとBullet画像の取り込み
     for(let k in towerDATASET){
         towerDATASET[k]["img"] = new Image();
-        towerDATASET[k]["img"].src = "img/" + k + ".png";
+        towerDATASET[k]["img"].src = `img/${k}.png`;
         towerDATASET[k]["bullet_img"] = new Image();
-        towerDATASET[k]["bullet_img"].src = "img/" + k + "_bullet.png";
+        towerDATASET[k]["bullet_img"].src = `img/${k}_bullet.png`;
     }
+    //Enemy画像の取り込み
     for (let k in enemyDATASET) {
         enemyDATASET[k]["img"] = new Image();
-        enemyDATASET[k]["img"].src = "img/" + k + ".png";
+        enemyDATASET[k]["img"].src = `img/${k}.png`;
     }
 }
 
@@ -199,7 +215,7 @@ function appearEnemies(name, route) {
     let from;//Enemyの出現位置
     switch (fieldDATASET[field]["fromTo"]) {
         case "bottom":
-            from = [getRundom(sXY[0] + b / 20, sXY[0] + b - b / 20 - b / 5 * enemyDATASET[name]["size"]), sXY[1] + b];
+            from = [getRundom(sXY[0] + b / 20, sXY[0] + b - b / 20 - b / 5 * enemyDATASET[name]["size"]), sXY[1] + b - 2];
             break;
         case "left":
             from = [sXY[0], getRundom(sXY[1] + b / 20, sXY[1] + b - b / 20 - b / 5 * enemyDATASET[name]["size"])];
@@ -590,6 +606,8 @@ function back() {
 
 //GameClearの処理
 function GameClear() {
+    Sounds["BGM"].pause();
+    Sounds["BGM"].currentTime = 0;
     mouseIndex = null;
     twsc.fillStyle = "rgba(255, 255, 255, 0.4)";
     twsc.fillRect(0, 0, tws.width, tws.height);
@@ -598,6 +616,7 @@ function GameClear() {
     twsc.font = fontHeight * 10 + "px 'Arial'";
     twsc.fillText("Clear!", 3 * b, 3 * b);
     twsc.strokeText("Clear!", 3 * b, 3 * b);
+    setTimeout(sound("clear"), 500);
 }
 
 //GameOverの処理
@@ -651,6 +670,48 @@ function changeLW() {
     }
 }
 
+//トップページの表示
+function showTopPage(){
+    const WIDTH = 700;
+    const HEIGHT = 350;
+    field.setAttribute("width", `${WIDTH}px`);
+    field.setAttribute("height", `${HEIGHT}px`);
+    fc.font = "50px Arial";
+    fc.fillStyle = "#fff";
+    let text = "TOWER DEFENCE";
+    let w = fc.measureText(text).width;
+    fc.fillText(text, WIDTH / 2 - w / 2, HEIGHT / 2);
+
+    //STARTボタン
+    text = "START";
+    w = fc.measureText(text).width;
+    h = 50;
+    fc.fillStyle = "#f00";
+    fc.fillRect( WIDTH / 2 - w / 2 - 10, HEIGHT / 2 + h /2, w + 20, h);
+    fc.fillStyle = "#fff"
+    fc.fillText(text, WIDTH / 2 - w / 2, HEIGHT / 2 + h  * 3 / 2 - 10);
+    field.addEventListener("click", startGame);
+}
+//ステージ選択画面に遷移
+function startGame(e) {
+    const WIDTH = 700;
+    const HEIGHT = 350;
+    const w = fc.measureText("START").width;
+    const h = 50;
+    let p = pos(e);
+    
+    if(
+        p[0] > WIDTH / 2 - w / 2 - 10 &&
+        p[0] < WIDTH / 2 - w / 2 - 10 + w + 20 &&
+        p[1] > HEIGHT / 2 + h / 2 &&
+        p[1] < HEIGHT / 2 + h / 2 + h
+    ){
+        field.removeEventListener("click", startGame);
+        GAMEMODE = 10
+        main();
+    }
+}
+
 //ステージ選択画面を表示
 function showStages() {
     b = 180;
@@ -677,34 +738,19 @@ function showStages() {
     for (let k in STAGEDATASET){
         let li = STAGEDATASET[k];
         fc.drawImage(li["img"], (c % num) * (b + 1) + 1, Math.floor(c / num) * (b + 1) + 1, b, b);
-        let w = fc.measureText(k).width;
-        fc.fillText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
-        fc.strokeText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
+        let w = fc.measureText(k).width
+        if (w > b) w = b;
+        fc.fillText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1, b);
+        fc.strokeText(k, (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1, b);
         w = fc.measureText(li["text"]).width;
-        fc.fillText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
-        fc.strokeText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
+        if (w > b) w = b;
+        fc.fillText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b, b);
+        fc.strokeText(li["text"], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b, b);
         STAGEDATASET[k]["x"] = c % num;
         STAGEDATASET[k]["y"] = Math.floor(c / num);
         c++
     }
-    //なんかステージ表示が上手くいかないので一旦放置。戻るを押したら表示される
-    /*STAGEDATASET.forEach((e) => {
-        let img = new Image();
-        img.src = "img/" + e[0] + ".png";
-        img.onload = () => {
-            fc.fillStyle = "rgb(255, 0, 0)";
-            fc.strokeStyle = "rgb(255, 255, 255)"
-            fc.drawImage(img, (c % num) * (b + 1) + 1, Math.floor(c / num) * (b + 1) + 1, b, b);
-            let w = fc.measureText(e[0]).width;
-            fc.fillText(e[0], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
-            fc.strokeText(e[0], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b / 5 + 1);
-            w = fc.measureText(e[1]).width;
-            fc.fillText(e[1], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
-            fc.strokeText(e[1], (c % num) * (b + 1) + 1 + b / 2 - w / 2, Math.floor(c / num) * (b + 1) + b);
-            e.push(c % num, Math.floor(c / num));
-            c++;
-        }
-    });*/
+    
     layer1.addEventListener("mousemove", selectStage);
     layer1.addEventListener("click", goStage);
 }
@@ -750,7 +796,7 @@ function goStage(e) {
         } else {
             lc1.clearRect(0, 0, layer1.width, layer1.height);
             fc.clearRect(0, 0, field.width, field.height);
-            GAMEMODE = 0
+            GAMEMODE = 0;
             main();
         }
     }

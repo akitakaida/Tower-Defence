@@ -5,15 +5,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tower Defence</title>
+    <link rel="stylesheet" href="css/@acab_reset.css">
     <link rel="stylesheet" href="css/td.css">
 </head>
 <body>
-    <canvas id = "field">プレイにはcanvasをサポートしているブラウザが必要になります</canvas>
-    <canvas id = "layer1"></canvas>
-    <canvas id = "layer2"></canvas>
-    <canvas id = "layer3"></canvas>
-    <canvas id = "showLWL"></canvas>
-    <canvas id = "showTowers"></canvas>
+    <div>
+        <canvas id="field">プレイにはcanvasをサポートしているブラウザが必要になります</canvas>
+        <canvas id="layer1"></canvas>
+        <canvas id="layer2"></canvas>
+        <canvas id="layer3"></canvas>
+        <canvas id="showLWL"></canvas>
+        <canvas id="showTowers"></canvas>
+    </div>
+    <div class = "rules">
+        <!--ルール説明-->
+        <ul>
+
+        </ul>
+        <li>Startを押すとゲームスタート</li>
+        <li>ステージをクリックすると開始</li>
+        <li>Next Waveを押すと次のウェーブが開始</li>
+        <li>タワーはドラッグアンドドロップで設置できる<br>（Fundからコスト分のお金を消費）</li>
+        <li>設置したタワーはダブルクリックで取り除ける<br>（コストの半分が返ってくる）</li>
+        <li>対象のタワーを重ねるように設置することでLevel Up</li>
+        <li>Level Upでタワーを設置すると、通常の半分のコストで済む</li>
+        <li>ライフが０になるとGAMEOVER</li>
+    </div>
     
     <script src="js/util.js"></script>
     <script src="js/data.js"></script>

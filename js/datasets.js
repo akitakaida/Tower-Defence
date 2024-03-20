@@ -56,6 +56,24 @@ let fieldDATASET = {
     "82": { fromTo:"top" }
 }
 
+//音源のリスト
+//tower_setsとenemy_movesが鳴らない
+let Sounds = {
+    "BGM": null,
+    "clear": null,
+    "tower_sets":null,
+    "赤タワー_shot":null,
+    "青タワー_shot":null,
+    "緑タワー_shot":null,
+    "白タワー_shot":null,
+    "紫タワー_shot":null,
+    "水タワー_shot":null,
+    "黄タワー_shot":null,
+    "enemy_appears": null,//使ってない
+    "enemy_damaged": null,//使ってない
+    "enemy_died":null,
+    "enemy_moves":null
+};
 
 //母クラス
 class charactor {
@@ -96,16 +114,19 @@ let towerDATASET = {
     "赤タワー": { range: 1, damage: 1, speed: 4, cost: 100, bullet_size: 1,  next: "赤タワー Lv.2"},
     "赤タワー Lv.2": { range: 2, damage: 1, speed: 7, cost: 400, bullet_size: 1,  next: "赤タワー Lv.3" },
     "赤タワー Lv.3": { range: 3, damage: 2, speed: 10, cost: 900, bullet_size: 1,  next: "赤タワー Lv.Max" },
-    "青タワー": { range: 3, damage: 2, speed: 1, cost: 200, bullet_size: 1,  next: "青タワー Lv.2" },
-    "青タワー Lv.2": { range: 6, damage: 4, speed: 1, cost: 500, bullet_size: 1,  next: "青タワー Lv.3" },
-    "青タワー Lv.3": { range: 10, damage: 6, speed: 2, cost: 1000, bullet_size: 1, next: "青タワー Lv.Max" },
+    "青タワー": { range: 3, damage: 2, speed: 1, cost: 200, bullet_size: 2,  next: "青タワー Lv.2" },
+    "青タワー Lv.2": { range: 6, damage: 4, speed: 1, cost: 500, bullet_size: 2,  next: "青タワー Lv.3" },
+    "青タワー Lv.3": { range: 10, damage: 6, speed: 2, cost: 1000, bullet_size: 3, next: "青タワー Lv.Max" },
     "緑タワー": { range: 1, damage: 4, speed: 1, cost: 300, bullet_size: 3,  next: "緑タワー Lv.2" },
     "緑タワー Lv.2": { range: 1, damage: 7, speed: 2, cost: 600, bullet_size: 3,  next: "緑タワー Lv.3"},
-    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, bullet_size: 3, next: "緑タワー Lv.Max" },
-    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000, bullet_size: 1, next: null},
-    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200, bullet_size: 1, next: null},
-    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500, bullet_size: 5, next: null},
-    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000, bullet_size: 1, next: null}
+    "緑タワー Lv.3": { range: 2, damage: 10, speed: 3, cost: 1100, bullet_size: 4, next: "緑タワー Lv.Max" },
+    "赤タワー Lv.Max": { range: 2, damage: 1, speed: 25, cost: 2000, bullet_size: 1, next: "紫タワー"},
+    "青タワー Lv.Max": { range: 20, damage: 7, speed: 1, cost: 2200, bullet_size: 3, next: "水タワー"},
+    "緑タワー Lv.Max": { range: 2, damage: 25, speed: 2, cost: 2500, bullet_size: 5, next: "黄タワー"},
+    "紫タワー": { range: 15, damage: 2, speed: 25, cost: 6000, bullet_size: 1, next: null},
+    "水タワー": { range: 20, damage: 15, speed: 2, cost: 7000, bullet_size: 3, next: null},
+    "黄タワー": { range: 2, damage: 25, speed: 15, cost: 9000, bullet_size: 5, next: null},
+    "白タワー": { range: 6, damage: 6, speed: 6, cost: 5000, bullet_size: 1, next: null }
 }
 
 class tower extends charactor {
@@ -117,6 +138,7 @@ class tower extends charactor {
         this.img = towerDATASET[name]["img"];
         this.target = this.Target();
         this.show();
+        sound("tower_sets");
     }
 
     get getDamage(){
@@ -162,13 +184,14 @@ class tower extends charactor {
         for (let i = 0; i < enemies.length; i++) {
             if (enemies[i].getID === this.target) {
                 bullets.push(new bullet(this.name, this.id, enemies[i].getID, this.damage));
+                sound(`${this.name.slice(0, 4)}_shot`);
                 return;
             }
         }
     }
 }
 
-//弾(未完成)
+//弾
 class bullet{
     constructor(towerName, towerID, enemyID, damage){
         this.x = 0;
@@ -262,6 +285,7 @@ class enemy extends charactor {
         this.culcDir();
         this.img = enemyDATASET[name]["img"];
         this.show();
+        sound("enemy_appears");
     }
     get getHP() {
         return this.hp;
@@ -283,12 +307,17 @@ class enemy extends charactor {
     move() {
         this.x += this.direction[0] * this.speed;
         this.y += this.direction[1] * this.speed;
+        //sound("enemy_moves"); //うるさいからナシ。
         this.judgeDir();
     }
     //被弾したらHPを減らす
     attacked(damage) {
+        //sound(enemy_damaged); //うるさいからなし。
         this.hp -= damage;
-        if(this.hp < 0) this.hp = 0;
+        if(this.hp < 0) {
+            sound("enemy_died");
+            this.hp = 0;
+        }
     }
     //移動する方向を決定
     culcDir() {

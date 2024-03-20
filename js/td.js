@@ -1,5 +1,3 @@
-compDATASET();
-
 //ステージ名
 let stage;
 //1ブロックの一片の長さ
@@ -44,7 +42,8 @@ let towerList = [];
 let mouseIndex = null;
 let levelUP = false;
 
-let GAMEMODE = 10;
+//ゲームモードの管理。
+let GAMEMODE = 9;
 
 //メインループ
 function main(){
@@ -73,6 +72,7 @@ function main(){
             mouseIndex = null;
             writeField(fieldDATA);
             GAMEMODE = 1;
+            sound("BGM", true);
             break;
         //Wave 開始前（待機状態）
         case 1:
@@ -99,9 +99,14 @@ function main(){
         case 5:
             GameOver();
             return;
+        //トップページの表示
+        case 9:
+            showTopPage();
+            return;
         //ステージ情報の表示
         case 10:
             showStages();
+            sound("BGM", true);
             return;
     }
     writeText();
@@ -109,6 +114,5 @@ function main(){
     requestAnimationFrame(main); 
 }
 
-
-main()
-
+compDATASET();
+main();
